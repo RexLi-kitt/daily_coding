@@ -40,13 +40,13 @@ int main(){
         adj[u].push_back(v);
     }
     vector<int> whole_road = topo(n,adj);
-    int length = n;
-    vector<int> last(n + 1);
-    for(int i = 1;i <= n;i ++){
-        int u = whole_road[i];
-        last[u] = length - i;
+    vector<int> dp(n + 1,1);
+    for(int u : whole_road){
+        for(int v : adj[u]){
+            dp[v] = max(dp[v],dp[u] + 1);
+        }
     }
-    for(int i = 0;i < n;i ++){
-        cout << whole_road[i] << endl;
+    for(int i = 1;i <= n;i ++){
+        cout << dp[i] << endl;
     }
 }
