@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include<queue>
 using namespace std;
 vector<int> topo(int n,vector<vector<int>> &adj){
     vector<int> indeg(n + 1);
@@ -45,7 +46,7 @@ int main(){
         int u = whole_road[i];
         last[u] = length - i;
     }
-    for(int i = 1;i <= n;i ++){
-        cout << last[i] << endl;
+    for(int i = 0;i < n;i ++){
+        cout << whole_road[i] << endl;
     }
 }
