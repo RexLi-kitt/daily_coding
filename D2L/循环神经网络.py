@@ -1,4 +1,5 @@
 import math 
+from pathlib import Path
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -7,6 +8,9 @@ from 语言模型和数据集 import load_data_time_machine
 import matplotlib
 matplotlib.use('TkAgg')  # '语言模型和数据集'内部执行过use('Agg'),这里恢复交互后端以便弹窗
 import matplotlib.pyplot as plt
+
+IMAGE_DIR = Path(__file__).resolve().parent / '图片'
+IMAGE_DIR.mkdir(exist_ok=True)
 
 batch_size,num_steps = 32,35
 train_iter, vocab = load_data_time_machine(batch_size,num_steps)
@@ -114,8 +118,10 @@ class ScriptAnimator:
         self.config_axes()
         plt.pause(0.001)
 
-    def finalize(self, fname='rnn_perplexity.png'):
+    def finalize(self, fname=None):
         # 训练结束:先保存图片,再弹窗展示(关闭窗口后脚本退出)
+        if fname is None:
+            fname = IMAGE_DIR / 'rnn_perplexity.png'
         self.fig.savefig(fname)
         print(f'曲线图已保存到 {fname}')
         plt.show()
