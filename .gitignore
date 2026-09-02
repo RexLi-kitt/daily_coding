@@ -15,3 +15,29 @@ __pycache__/
 
 # macOS metadata
 .DS_Store
+
+# C/C++ compiler output and debug symbols
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.d
+*.dSYM/
+
+# CMake build output
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# This program is generated beside its source file.
+# Prefer writing future executable files to build/ instead.
+/日常学习/单向链表
+/日常学习/单源最短路径
