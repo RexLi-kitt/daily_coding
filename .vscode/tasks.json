@@ -1,6 +1,16 @@
 {
     "tasks": [
         {
+            "label": "创建 C++ 构建目录",
+            "type": "shell",
+            "command": "/bin/mkdir",
+            "args": [
+                "-p",
+                "${workspaceFolder}/build/${relativeFileDirname}"
+            ],
+            "problemMatcher": []
+        },
+        {
             "type": "cppbuild",
             "label": "C/C++: clang++ 生成活动文件",
             "command": "/usr/bin/clang++",
@@ -10,8 +20,9 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${workspaceFolder}/build/${relativeFileDirname}/${fileBasenameNoExtension}"
             ],
+            "dependsOn": "创建 C++ 构建目录",
             "options": {
                 "cwd": "${fileDirname}"
             },
