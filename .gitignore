@@ -16,6 +16,10 @@ __pycache__/
 # macOS metadata
 .DS_Store
 
+# Local VS Code workspace settings
+.vscode/
+/tools/build-active-cpp.ps1
+
 # C/C++ compiler output and debug symbols
 *.o
 *.obj
@@ -28,6 +32,13 @@ __pycache__/
 *.out
 *.d
 *.dSYM/
+*.i
+*.ii
+*.s
+*.su
+*.gcda
+*.gcno
+*.gcov
 
 # CMake build output
 build/

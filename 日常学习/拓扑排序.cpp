@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include<queue>
 using namespace std;
 //只适用于DAG
 vector<int> topo(int n, vector<vector<int>>& adj){
