@@ -48,8 +48,9 @@ CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
 
-# This program is generated beside its source file.
-# Prefer writing future executable files to build/ instead.
-/日常学习/单向链表
-/日常学习/单源最短路径
-/日常学习/最长路
+# Compiled artifacts from .cpp sources.
+# On macOS the compiler emits an extension-less executable beside its .cpp
+# source (plus a .dSYM debug folder). Keep only the sources in this folder so
+# every new build is ignored automatically.
+/日常学习/*
+!日常学习/*.cpp
