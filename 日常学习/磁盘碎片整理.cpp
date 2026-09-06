@@ -1,38 +1,60 @@
-#include <iostream>
-#include <vector>
+#include<iostream>
+#include<vector>
+#include<cstring>
 using namespace std;
-
 int main(){
-    int n, k;
+    int n,k;
     cin >> n >> k;
-    vector<int> target(n + 1, 0);        // target[u]: 块 u 应该去的位置
-    vector<bool> occupied(n + 1, false); // 该位置当前是否有块
-    int pos = 1;
-    for (int i = 0; i < k; i++){
-        int s; cin >> s;
-        for (int j = 0; j < s; j++){
-            int u; cin >> u;
-            occupied[u] = true;
-            target[u] = pos++;           // 按文件顺序依次分配目标位
+    vector<vector<int>> storage(k + 1);
+    vector<vector<int>> supposed(k + 1);
+    int cnt = 1;
+    vector<pair<int,int>> occupied(n + 1);
+    for(int i = 0;i < k;i ++){
+        int t;
+        cin >> t;
+        for(int j = 0;j < t;j ++){
+            int temp;
+            cin >> temp;
+            storage[i + 1].push_back(temp);
+            supposed[i + 1].push_back(cnt++);
+            occupied[temp] = {i + 1,j};
         }
     }
-
-    int misplaced = 0, cycles = 0;
-    vector<bool> vis(n + 1, false);
-    for (int u = 1; u <= n; u++){
-        if (!occupied[u] || target[u] == u) continue; // 空块或已就位：跳过
-        misplaced++;
-        if (vis[u]) continue;
-        int cur = u;
-        while (!vis[cur]){                // 块编号 = 其当前位置，故下一块就是 target[cur]
-            vis[cur] = true;
-            cur = target[cur];
-            if (!occupied[cur]) break;    // 链的尽头是空块：不是环
+    int mov = 0;
+    for(int i = 1;i <= k;i ++){
+        for(int j = 0;j < storage[i].size();j ++){
+            int u = storage[i][j];
+            int right_idx = supposed[i][j];
+            if(right_idx == u) continue;
+            pair<int,int> vid = {0,0};
+            if(occupied[right_idx] == vid){
+                occupied[right_idx] = occupied[u];
+                occupied[u] = {0,0};
+                mov++;
+            }
+            else{
+                //先考虑称环的情况
+                auto[z,v] = occupied[right_idx];
+                int his_target = supposed[z][v];
+                if(his_target == u){
+                    mov += 2;
+                    occupied[u] = {0,0};
+                    occupied[right_idx] = {i,j};
+                }
+                else{
+                    mov ++;
+                    occupied[right_idx] =occupied[u];
+                    occupied[u] = {0,0};
+                }
+            }
         }
-        if (cur == u) cycles++;           // 走回起点：找到一个环
     }
-
-    if (misplaced == 0) cout << "No optimization needed." << endl;
-    else cout << "We need " << misplaced + cycles << " move operations." << endl;
-    return 0;
+    if(mov == 0){
+        cout <<"No optimization needed.";
+    }
+    else{
+        cout << "We need ";
+        cout << mov;
+        cout << " move operations.";
+    }
 }
