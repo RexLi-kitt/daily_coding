@@ -1,0 +1,104 @@
+[
+  {
+    "title": "01 DFS：图的遍历",
+    "source": "日常学习/装箱问题02.cpp 的递归组织方式；图遍历为补充",
+    "note": "图下标 1..n，O(n+m)。vis 表示这个点是否访问过，图遍历结束后不撤销。无向图统计连通块时，从每个没访问过的点开始 dfs。链状图很深时递归可能爆栈，改用下面的栈版本。",
+    "code": "void dfs(int u,vector<vector<int>> &g,vector<bool> &vis){\n    vis[u] = true;\n    // 在这里处理当前点 u\n    for(int v : g[u]){\n        if(!vis[v]){\n            dfs(v,g,vis);\n        }\n    }\n}\n// 调用：vector<bool> vis(n + 1,false); dfs(s,g,vis);\n// 求无向图连通块：枚举 i=1..n，没访问过就 cnt++，dfs(i,g,vis)。\n\n// 点很多、递归可能太深时，用栈代替递归\nvoid dfs_stack(int s,vector<vector<int>> &g,vector<bool> &vis){\n    stack<int> st;\n    st.push(s);\n    vis[s] = true;\n    while(!st.empty()){\n        int u = st.top();\n        st.pop();\n        for(int v : g[u]){\n            if(!vis[v]){\n                vis[v] = true;\n                st.push(v);\n            }\n        }\n    }\n}"
+  },
+  {
+    "title": "02 DFS：回溯枚举",
+    "source": "日常学习/backward_digital_sum.cpp；日常学习/cow_in_skycraper.cpp",
+    "note": "沿用你的 memo、vis、dfs(idx,n) 写法，下面枚举 1..n 的排列。vis=true 表示已经使用。先选择、递归、再撤销；O(n*n!)（含输出）。与图遍历不同，回溯必须恢复本层修改。",
+    "code": "vector<int> memo;\nvector<bool> vis;\nvoid dfs(int idx,int n){\n    if(idx == n + 1){\n        for(int i = 1;i <= n;i ++){\n            cout << memo[i] << ' ';\n        }\n        cout << '\\n';\n        return;\n    }\n    for(int i = 1;i <= n;i ++){\n        if(vis[i]){\n            continue;\n        }\n        memo[idx] = i;\n        vis[i] = true;\n        dfs(idx + 1,n);\n        vis[i] = false; // 撤销选择，让其他分支也能用 i\n    }\n}\n// main 里先初始化，再开始搜索：\n// memo.assign(n + 1,0);\n// vis.assign(n + 1,false);\n// dfs(1,n);\n// 找一个解就结束：改为 bool dfs，找到后 return true，参考你的原题。"
+  },
+  {
+    "title": "03 BFS：无权图最短路",
+    "source": "参考日常学习/最长路BFS.cpp 的队列写法；改为无权最短路",
+    "note": "边权相同才可用普通 BFS 求最少步数；O(n+m)。dist=-1 表示没访问过或不可达。入队时就更新距离，不能等到出队再标记。",
+    "code": "void bfs(int s,vector<vector<int>> &g,vector<int> &dist){\n    dist.assign(g.size(),-1);\n    queue<int> q;\n    dist[s] = 0;\n    q.push(s);\n    while(!q.empty()){\n        int u = q.front();\n        q.pop();\n        for(int v : g[u]){\n            if(dist[v] == -1){\n                dist[v] = dist[u] + 1;\n                q.push(v);\n            }\n        }\n    }\n}\n// vector<int> dist;\n// bfs(s,g,dist);\n// cout << dist[t]; // 这里约定不可达输出 -1，实际看题目要求"
+  },
+  {
+    "title": "04 BFS：网格与多源扩散",
+    "source": "暑期训练营代码/Day2/血色先锋队.cpp；日常学习/SEARCH.cpp",
+    "note": "grid 是矩形网格，0 下标，X 是障碍。src 中源点坐标必须有效；多源一起入队，单源传 {{sx,sy}}。O(n*m+源点数)。注意行数 n 和列数 m 不一样。",
+    "code": "void bfs(vector<string> &grid,vector<pair<int,int>> &src,\n         vector<vector<int>> &dist){\n    int n = grid.size();\n    int m = 0;\n    if(n > 0){\n        m = grid[0].size();\n    }\n    dist.assign(n,vector<int>(m,-1));\n    queue<pair<int,int>> q;\n    for(auto [x,y] : src){\n        if(grid[x][y] != 'X' && dist[x][y] == -1){\n            dist[x][y] = 0;\n            q.push({x,y});\n        }\n    }\n    int dx[4] = {1,-1,0,0};\n    int dy[4] = {0,0,1,-1};\n    while(!q.empty()){\n        auto [x,y] = q.front();\n        q.pop();\n        for(int i = 0;i < 4;i ++){\n            int nx = x + dx[i];\n            int ny = y + dy[i];\n            if(nx < 0 || nx >= n || ny < 0 || ny >= m){\n                continue;\n            }\n            if(grid[nx][ny] == 'X' || dist[nx][ny] != -1){\n                continue;\n            }\n            dist[nx][ny] = dist[x][y] + 1;\n            q.push({nx,ny});\n        }\n    }\n}"
+  },
+  {
+    "title": "05 Dijkstra：非负边权最短路",
+    "source": "日常学习/单源最短路径.cpp",
+    "note": "保留你原来的 g、dist、done、pq。所有边权必须非负；距离用 long long，所有有效距离须小于 INF。堆优化 O((n+m)log(n+m))，可保留平行边。图 1 下标，无向边存两次。INF 在公共头中定义。",
+    "code": "void dijkstra(int s,vector<vector<pair<int,long long>>> &g,\n              vector<long long> &dist){\n    dist.assign(g.size(),INF);\n    vector<bool> done(g.size(),false);\n    priority_queue<pair<long long,int>,\n                   vector<pair<long long,int>>,greater<>> pq;\n    dist[s] = 0;\n    pq.push({0,s}); // 距离在前，点的编号在后\n    while(!pq.empty()){\n        auto [d,u] = pq.top();\n        pq.pop();\n        if(done[u]){\n            continue;\n        }\n        done[u] = true;\n        for(auto [v,w] : g[u]){\n            if(dist[u] + w < dist[v]){\n                dist[v] = dist[u] + w;\n                pq.push({dist[v],v});\n            }\n        }\n    }\n}\n// 调用：vector<long long> dist; dijkstra(s,g,dist);\n// dist[t] == INF 表示不可达，按题意输出。\n// 边权也须小于 INF，保证 dist[u]+w 不溢出。\n// 记录路径：更新成功时 pre[v]=u；从终点回溯，再 reverse。"
+  },
+  {
+    "title": "06 拓扑排序与 DAG 最长路",
+    "source": "日常学习/拓扑排序.cpp；日常学习/最长路.cpp",
+    "note": "沿用 indeg、ans、topo_q、dp。只用于有向无环图，允许负边；O(n+m)。拓扑序少于 n 个点说明有环，不能继续套 DAG 最长路。dp=-INF 表示不可达，路径和须在 (-INF,INF) 内。",
+    "code": "vector<int> topo(vector<vector<pair<int,long long>>> &g,int n){\n    vector<int> indeg(n + 1,0);\n    for(int i = 1;i <= n;i ++){\n        for(auto [v,w] : g[i]){\n            indeg[v] ++;\n        }\n    }\n    queue<int> q;\n    for(int i = 1;i <= n;i ++){\n        if(indeg[i] == 0){\n            q.push(i);\n        }\n    }\n    vector<int> ans;\n    while(!q.empty()){\n        int u = q.front();\n        q.pop();\n        ans.push_back(u);\n        for(auto [v,w] : g[u]){\n            indeg[v] --;\n            if(indeg[v] == 0){\n                q.push(v);\n            }\n        }\n    }\n    return ans;\n}\n// 返回 false 表示有环，dp 通过引用参数带回\nbool longest(int s,vector<vector<pair<int,long long>>> &g,\n             vector<long long> &dp){\n    int n = (int)g.size() - 1;\n    vector<int> topo_q = topo(g,n);\n    dp.assign(n + 1,-INF);\n    if((int)topo_q.size() != n){\n        return false;\n    }\n    dp[s] = 0;\n    for(int u : topo_q){\n        if(dp[u] == -INF){\n            continue;\n        }\n        for(auto [v,w] : g[u]){\n            dp[v] = max(dp[v],dp[u] + w);\n        }\n    }\n    return true;\n}"
+  },
+  {
+    "title": "07 并查集",
+    "source": "日常学习/最小生成树.cpp",
+    "note": "直接使用你原来的全局 fa、rk 和 init/find/unite，补上同集合判断。路径压缩+按秩合并，均摊 O(α(n))。每组数据先 init(n)。",
+    "code": "vector<int> fa,rk;\nvoid init(int n){\n    fa.resize(n + 1);\n    rk.assign(n + 1,0);\n    for(int i = 0;i <= n;i ++){\n        fa[i] = i;\n    }\n}\nint find(int x){\n    if(x == fa[x]){\n        return x;\n    }\n    fa[x] = find(fa[x]); // 路径压缩\n    return fa[x];\n}\nvoid unite(int x,int y){\n    x = find(x);\n    y = find(y);\n    if(x == y){\n        return;\n    }\n    if(rk[x] < rk[y]){\n        swap(x,y);\n    }\n    fa[y] = x;\n    if(rk[x] == rk[y]){\n        rk[x] ++;\n    }\n}\n// init(n); unite(x,y);\n// if(find(x) == find(y)) cout << \"同一个集合\";"
+  },
+  {
+    "title": "08 Kruskal：最小生成树",
+    "source": "日常学习/最小生成树.cpp",
+    "note": "沿用你的 edge、edges、operator<、total、cnt。先复制第 07 节并查集。无向图允许负边，n>=1，O(m log m)。bool 返回是否连通，total 保存答案，避免 -1 与合法负权答案冲突。",
+    "code": "struct edge{\n    int u;\n    int v;\n    long long w;\n    bool operator<(const edge &other) const{\n        return w < other.w;\n    }\n};\nvector<edge> edges;\nbool kruskal(int n,long long &total){\n    init(n);\n    sort(edges.begin(),edges.end());\n    total = 0;\n    int cnt = 0;\n    for(auto &e : edges){\n        if(cnt == n - 1){\n            break;\n        }\n        if(find(e.u) != find(e.v)){\n            unite(e.u,e.v);\n            total += e.w;\n            cnt ++;\n        }\n    }\n    return cnt == n - 1;\n}\n// 每组先 edges.clear()，读边：edges.push_back({u,v,w});\n// long long total;\n// if(kruskal(n,total)) cout << total;\n// else cout << \"orz\"; // 不连通的输出按题目要求修改"
+  },
+  {
+    "title": "09 二分答案：用跳石头作例子",
+    "source": "暑期训练营代码/Day1/跳石头.cpp；沿用普通 ok 函数",
+    "note": "不用泛型和 lambda：直接写 ok(dist,...)，二分最大可行距离。location 是升序内部石头位置，末尾追加终点 L。判定为“先 true 后 false”，总复杂度 O(n log L)。",
+    "code": "bool ok(long long dist,vector<long long> &location,int m){\n    int move_cnt = 0;\n    long long last = 0;\n    for(long long x : location){\n        if(x - last < dist){\n            move_cnt ++;\n        }\n        else{\n            last = x;\n        }\n    }\n    return move_cnt <= m;\n}\nlong long binary_search(long long L,vector<long long> &location,int m){\n    long long l = 0;\n    long long r = L;\n    while(l < r){\n        long long mid = l + (r - l + 1) / 2;\n        if(ok(mid,location,m)){\n            l = mid;\n        }\n        else{\n            r = mid - 1;\n        }\n    }\n    return l;\n}\n// 调用前 sort(location.begin(),location.end()); location.push_back(L);\n// 最后一段过短时，计数相当于移除前一个保留石头，终点不移动。\n// 找最小可行值（先 false 后 true），改成：\n// mid = l + (r-l)/2;\n// if(ok(mid,...)) r=mid; else l=mid+1;\n// 两种写法都要求 [l,r] 内至少有一个可行答案。"
+  },
+  {
+    "title": "10 树状数组：单点加、区间和",
+    "source": "暑期训练营代码/Day5/树状数组1.cpp；改成 vector 全局数组",
+    "note": "1 下标，add(0,...) 会死循环。每次操作 O(log n)。先设置 n 并 tree.assign(n+1,0)，再逐个 add(i,a[i]) 建树。",
+    "code": "int n;\nvector<long long> tree;\nint lowbit(int x){\n    return x & -x;\n}\nvoid add(int x,long long k){\n    while(x <= n){\n        tree[x] += k;\n        x += lowbit(x);\n    }\n}\nlong long sum(int x){\n    long long ans = 0;\n    while(x > 0){\n        ans += tree[x];\n        x -= lowbit(x);\n    }\n    return ans;\n}\nlong long query(int l,int r){\n    return sum(r) - sum(l - 1);\n}\n// 区间加、单点查：改为用差分数组建树。\n// [l,r]加k：add(l,k); 若r<n，再add(r+1,-k)。\n// 查询第x个值：sum(x)。不要和“单点加、区间和”混用。"
+  },
+  {
+    "title": "11 单调栈：右侧第一个更大元素",
+    "source": "暑期训练营代码/Day5/单调栈.cpp",
+    "note": "保留你的 data、ans、s，输入 data 为 1 下标，data[0] 不使用。答案是下标，0 表示不存在。O(n)。严格更大用 >，大于等于用 >=。",
+    "code": "vector<int> next_greater(vector<long long> &data){\n    int n = (int)data.size() - 1;\n    stack<int> s;\n    vector<int> ans(n + 1,0);\n    for(int i = 1;i <= n;i ++){\n        while(!s.empty() && data[i] > data[s.top()]){\n            ans[s.top()] = i;\n            s.pop();\n        }\n        s.push(i);\n    }\n    return ans;\n}"
+  },
+  {
+    "title": "12 单调队列：滑动窗口最小值",
+    "source": "暑期训练营代码/Day5/滑动窗口.cpp",
+    "note": "数组 0 下标，1<=k<=n，O(n)。q 存下标，ans 存每个窗口的最小值。把 >= 改成 <= 就是求最大值。",
+    "code": "vector<long long> window_min(vector<long long> &a,int k){\n    deque<int> q;\n    vector<long long> ans;\n    for(int i = 0;i < (int)a.size();i ++){\n        while(!q.empty() && q.front() <= i - k){\n            q.pop_front(); // 移除已经离开窗口的下标\n        }\n        while(!q.empty() && a[q.back()] >= a[i]){\n            q.pop_back(); // 后来的数更小，前面的大数没有用了\n        }\n        q.push_back(i);\n        if(i >= k - 1){\n            ans.push_back(a[q.front()]);\n        }\n    }\n    return ans;\n}"
+  },
+  {
+    "title": "13 背包：01 与完全",
+    "source": "日常学习/装箱问题.cpp；暑期训练营代码/Day3/疯狂的采药.cpp",
+    "note": "拆成两个普通函数，直接对照循环方向。weight、value 都是 0 下标，体积为正。dp[j] 表示容量不超过 j 的最大价值，允许不选。O(nV)，空间 O(V)。恰好装满：只设 dp[0]=0，其余=-INF，且来源可达才能转移。",
+    "code": "long long bag01(int V,vector<int> &weight,vector<long long> &value){\n    vector<long long> dp(V + 1,0);\n    for(int i = 0;i < (int)weight.size();i ++){\n        // 每件只能选一次，所以容量倒序\n        for(int j = V;j >= weight[i];j --){\n            dp[j] = max(dp[j],dp[j - weight[i]] + value[i]);\n        }\n    }\n    return dp[V];\n}\nlong long bag_complete(int V,vector<int> &weight,\n                       vector<long long> &value){\n    vector<long long> dp(V + 1,0);\n    for(int i = 0;i < (int)weight.size();i ++){\n        // 每件可以选无限次，所以容量正序\n        for(int j = weight[i];j <= V;j ++){\n            dp[j] = max(dp[j],dp[j - weight[i]] + value[i]);\n        }\n    }\n    return dp[V];\n}\n// 装箱最小剩余：让 value[i]=weight[i]，答案 V-bag01(V,weight,value)。"
+  },
+  {
+    "title": "14 LIS：最长严格上升子序列",
+    "source": "暑期训练营代码/Day3/最长上升子序列.cpp",
+    "note": "保留原来的 tails、lower_bound 写法，O(n log n)。严格上升用 lower_bound，不下降用 upper_bound。tails 的长度是答案，但 tails 本身不一定是原数组的一条子序列。",
+    "code": "int lis(vector<long long> &a){\n    vector<long long> tails;\n    for(long long x : a){\n        auto it = lower_bound(tails.begin(),tails.end(),x);\n        if(it == tails.end()){\n            tails.push_back(x);\n        }\n        else{\n            *it = x;\n        }\n    }\n    return tails.size();\n}"
+  },
+  {
+    "title": "15 字符串哈希：子串比较",
+    "source": "暑期训练营代码/Day9/字符串匹配.cpp",
+    "note": "沿用全局 hash_num、pw 和 get 函数，不用类。s 是 0 下标；get(l,r) 取半开区间 [l,r)，要求 0<=l<=r<=s.size()。O(n) 预处理，O(1) 查询。哈希有碰撞风险，精确匹配可用 KMP。",
+    "code": "vector<unsigned long long> hash_num,pw;\nvoid init_hash(string &s){\n    int n = s.size();\n    hash_num.assign(n + 1,0);\n    pw.assign(n + 1,1);\n    for(int i = 0;i < n;i ++){\n        hash_num[i + 1] = hash_num[i] * 131 + (unsigned char)s[i] + 1;\n        pw[i + 1] = pw[i] * 131;\n    }\n}\nunsigned long long get(int l,int r){\n    return hash_num[r] - hash_num[l] * pw[r - l];\n}\n// string s=\"ababa\"; init_hash(s);\n// get(0,3) 和 get(2,5) 对应两个 \"aba\"。\n// 当前全局数组只保存最近一次 init_hash 的字符串。"
+  },
+  {
+    "title": "16 KMP：精确字符串匹配（补充）",
+    "source": "补充模板，按普通函数与 vector 写法展开",
+    "note": "s 为原串，p 为模式串，均为 0 下标。返回所有匹配起点，允许重叠，O(n+m)。nxt[i] 是 p[0..i] 最长相等真前后缀长度；j 是当前匹配长度。这里约定空模式返回空结果。",
+    "code": "vector<int> kmp(string &s,string &p){\n    int m = p.size();\n    vector<int> ans;\n    if(m == 0){\n        return ans;\n    }\n    vector<int> nxt(m,0);\n    int j = 0;\n    for(int i = 1;i < m;i ++){\n        while(j > 0 && p[i] != p[j]){\n            j = nxt[j - 1];\n        }\n        if(p[i] == p[j]){\n            j ++;\n        }\n        nxt[i] = j;\n    }\n    j = 0;\n    for(int i = 0;i < (int)s.size();i ++){\n        while(j > 0 && s[i] != p[j]){\n            j = nxt[j - 1];\n        }\n        if(s[i] == p[j]){\n            j ++;\n        }\n        if(j == m){\n            ans.push_back(i - m + 1);\n            j = nxt[j - 1]; // 继续找，允许重叠\n        }\n    }\n    return ans;\n}"
+  },
+  {
+    "title": "17 快速幂与逆元",
+    "source": "暑期训练营代码/Day8/模意义下的乘法逆元.cpp；快速幂为补充",
+    "note": "b>=0，1<=mod<=2^31-1，确保 long long 乘法不会溢出；O(log b)。费马逆元要求 p 是质数且 a%p!=0，不适用于任意模数。",
+    "code": "long long qpow(long long a,long long b,long long mod){\n    a = (a % mod + mod) % mod;\n    long long ans = 1 % mod;\n    while(b > 0){\n        if(b % 2 == 1){\n            ans = ans * a % mod;\n        }\n        a = a * a % mod;\n        b /= 2;\n    }\n    return ans;\n}\n// 质数 p 下，a 的逆元：qpow(a,p-2,p)。\n// 批量求逆元（1<=n<p，p是质数）：\n// vector<long long> inv(n + 1);\n// inv[1] = 1;\n// for(int i = 2;i <= n;i ++){\n//     inv[i] = (p - p / i) * inv[p % i] % p;\n// }"
+  }
+]
