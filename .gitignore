@@ -54,3 +54,4 @@ compile_commands.json
 # every new build is ignored automatically.
 /日常学习/*
 !日常学习/*.cpp
+!日常学习/*.h
