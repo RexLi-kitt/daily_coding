@@ -6,7 +6,8 @@
 using namespace std;
 //比较符号的优先级
 int priority(char ch){
-    if(ch == '^') return 3;
+    if(ch == '^') return 4;
+    if(ch == '~') return 3; // 用 ~ 表示一元负号
     if(ch == '*' || ch == '/') return 2;
     if(ch == '+' || ch == '-') return 1;
     return 0;
@@ -19,27 +20,17 @@ int main(){
     bool needOperand = true;
     cout << "请输入整数中缀表达式：";
     getline(cin, s);
-    for(int i = 0;i < s.size();i ++){
+    for(int i = 0;i < (int)s.size();i ++){
         char ch = s[i];
         if(ch == ' ') continue;
-        //注意处理负号/负数
-        if(isdigit(ch) || (ch == '-' && needOperand)){
+        if(isdigit(ch)){
             if(!needOperand){
                 cout << "错误：两个操作数之间缺少运算符" << endl;
                 return 0;
             }
-            //一次性读入长数字,注意负数
+            //一次性读入长数字
             string number;
             int j = i;
-            if(s[j] == '-'){
-                number += '-';
-                j ++;
-                while(j < (int)s.size() && s[j] == ' ') j ++;
-                if(j >= (int)s.size() || !isdigit(s[j])){
-                    cout << "错误：运算符位置错误" << endl;
-                    return 0;
-                }
-            }
             while(j < (int)s.size() && isdigit(s[j])){
                 number += s[j];
                 j ++;
@@ -47,6 +38,10 @@ int main(){
             i = j - 1;
             ans.push_back(number);
             needOperand = false;
+        }
+        else if(ch == '-' && needOperand){
+            // 前面需要操作数时，- 是一元负号，例如 -2 或 -(2+3)
+            st.push('~');
         }
         else if(ch == '('){
             if(!needOperand){
@@ -117,12 +112,18 @@ int main(){
     //根据后缀计算出结果
     stack<long long> numbers;
     for(int i = 0;i < (int)ans.size();i ++){
-        //只需要检查第一个
-        if(isdigit(ans[i][0]) ||
-           (ans[i].size() > 1 && ans[i][0] == '-' && isdigit(ans[i][1]))){
+        if(isdigit(ans[i][0])){
             numbers.push(stoll(ans[i]));
         }
-
+        else if(ans[i] == "~"){
+            if(numbers.empty()){
+                cout << "错误：操作数数量不正确" << endl;
+                return 0;
+            }
+            long long value = numbers.top();
+            numbers.pop();
+            numbers.push(-value);
+        }
         else{
             //只有一个数字
             if(numbers.size() < 2){
