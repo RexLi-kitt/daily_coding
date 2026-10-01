@@ -1,0 +1,34 @@
+[
+  {
+    "model": "cnn",
+    "comparison": "epochs 50 vs 80 within this same new run",
+    "epoch50": {
+      "train_loss": 0.5705979765319824,
+      "test_loss": 1.6046271970748902,
+      "train_acc": 0.79782,
+      "test_acc": 0.5704
+    },
+    "epoch80": {
+      "train_loss": 0.3573348931312561,
+      "test_loss": 2.512801235961914,
+      "train_acc": 0.87494,
+      "test_acc": 0.5535
+    }
+  },
+  {
+    "model": "mlp",
+    "comparison": "epochs 50 vs 80 within this same new run",
+    "epoch50": {
+      "train_loss": 0.8970952758789063,
+      "test_loss": 1.526792162322998,
+      "train_acc": 0.68026,
+      "test_acc": 0.5056
+    },
+    "epoch80": {
+      "train_loss": 0.4509986044502258,
+      "test_loss": 2.530120373916626,
+      "train_acc": 0.84084,
+      "test_acc": 0.4469
+    }
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "model": "resnet18",
+    "display_name": "ResNet-18 BasicBlock",
+    "epochs": 80,
+    "final_train_loss": 0.08700826322317123,
+    "final_test_loss": 0.6905185340881348,
+    "final_train_acc_pct": 96.962,
+    "final_test_acc_pct": 84.41,
+    "best_test_acc_pct": 84.5,
+    "best_test_epoch": 60
+  },
+  {
+    "model": "cnn",
+    "display_name": "CNN",
+    "epochs": 80,
+    "final_train_loss": 0.3573348931312561,
+    "final_test_loss": 2.512801235961914,
+    "final_train_acc_pct": 87.494,
+    "final_test_acc_pct": 55.35,
+    "best_test_acc_pct": 57.96,
+    "best_test_epoch": 37
+  },
+  {
+    "model": "mlp",
+    "display_name": "MLP",
+    "epochs": 80,
+    "final_train_loss": 0.4509986044502258,
+    "final_test_loss": 2.530120373916626,
+    "final_train_acc_pct": 84.084,
+    "final_test_acc_pct": 44.690000000000005,
+    "best_test_acc_pct": 52.53,
+    "best_test_epoch": 36
+  }
+]

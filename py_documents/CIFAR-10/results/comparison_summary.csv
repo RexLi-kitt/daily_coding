@@ -1,0 +1,4 @@
+﻿model,display_name,epochs,final_train_loss,final_test_loss,final_train_acc_pct,final_test_acc_pct,best_test_acc_pct,best_test_epoch
+resnet18,ResNet-18 BasicBlock,80,0.08700826322317123,0.6905185340881348,96.962,84.41,84.5,60
+cnn,CNN,80,0.3573348931312561,2.512801235961914,87.494,55.35,57.96,37
+mlp,MLP,80,0.4509986044502258,2.530120373916626,84.084,44.690000000000005,52.53,36

@@ -1,0 +1,35 @@
+{
+  "python_syntax": "passed",
+  "model_forward_checks": [
+    {
+      "model": "resnet18",
+      "output_shape": [
+        2,
+        10
+      ],
+      "parameters": 11181642
+    },
+    {
+      "model": "cnn",
+      "output_shape": [
+        2,
+        10
+      ],
+      "parameters": 83126
+    },
+    {
+      "model": "mlp",
+      "output_shape": [
+        2,
+        10
+      ],
+      "parameters": 1314826
+    }
+  ],
+  "chart_visual_qa": "passed: updated 80-epoch PNG files inspected",
+  "training_default_epochs": 80,
+  "training_implementation_change": "Modules separated; core implementations verified unchanged. See refactor_verification.json.",
+  "historical_50epoch_records_preserved": true,
+  "training_data_unchanged": true,
+  "refactor_verification": "refactor_verification.json"
+}

@@ -1,0 +1,45 @@
+{
+  "model": "resnet18",
+  "display_name": "ResNet-18 (BasicBlock)",
+  "depth": 18,
+  "architecture_note": "Original paper ResNet v1 BasicBlock architecture",
+  "paper": "https://www.microsoft.com/en-us/research/wp-content/uploads/2021/07/Deep-Residual-Learning-for-Image-Recognition.pdf",
+  "blocks": [
+    2,
+    2,
+    2,
+    2
+  ],
+  "block_type": "BasicBlock",
+  "parameters": 11181642,
+  "checkpoint": "resnet18_cifar10_final.pt",
+  "input_size": "3x32x32",
+  "classifier_classes": 10,
+  "optimizer": "SGD, momentum=0.9, weight_decay=0.0001",
+  "learning_rate": 0.05,
+  "lr_milestones": [
+    48,
+    64
+  ],
+  "warmup_epochs": 3,
+  "batch_size": 512,
+  "epochs": 80,
+  "seed": 42,
+  "augmentation": "random crop from 4-pixel padding, random horizontal flip",
+  "normalization": "CIFAR-10 training-set channel mean and std",
+  "precision": "bfloat16 autocast",
+  "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+  "elapsed_seconds": 85.42,
+  "final": {
+    "epoch": 80,
+    "train_loss": 0.08700826322317123,
+    "test_loss": 0.6905185340881348,
+    "train_acc": 0.96962,
+    "test_acc": 0.8441,
+    "train_top5_err": 0.00012000000000000899,
+    "test_top5_err": 0.009600000000000053,
+    "learning_rate": 0.0005000000000000001
+  },
+  "best_test_acc": 0.845,
+  "best_test_epoch": 60
+}

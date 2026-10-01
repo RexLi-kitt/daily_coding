@@ -1,0 +1,23 @@
+{
+  "model": "mlp",
+  "architecture": "3072-256-ReLU-512-ReLU-512-Tanh-256-ReLU-10",
+  "preprocessing": "ToTensor (uint8 / 255)",
+  "optimizer": "SGD",
+  "learning_rate": 0.1,
+  "batch_size": 256,
+  "epochs": 80,
+  "seed": 42,
+  "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+  "elapsed_seconds": 24.39,
+  "final": {
+    "epoch": 80,
+    "train_loss": 0.4509986044502258,
+    "test_loss": 2.530120373916626,
+    "train_acc": 0.84084,
+    "test_acc": 0.4469,
+    "train_top5_err": 0.00546000000000002,
+    "test_top5_err": 0.09609999999999996
+  },
+  "best_test_acc": 0.5253,
+  "best_test_epoch": 36
+}

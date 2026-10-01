@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "total_epochs": 240,
+  "checks": [
+    {
+      "model": "resnet18",
+      "rows": 80,
+      "csv_json_match": true,
+      "metrics_sha256": "d370efdd1f7790cef630fe973816cf3f955d5a86f12ed600b91ed9a0189f49bc",
+      "summary_sha256": "a201b31dfd2f654f13ee3ed93d5f6f70313a02235b15199211ae436060863c69"
+    },
+    {
+      "model": "cnn",
+      "rows": 80,
+      "csv_json_match": true,
+      "metrics_sha256": "90178f42cba19ba30fc1482f897d6e06a343e6d5c81fe0e21075905fd4ebd754",
+      "summary_sha256": "74ecdc3ee5061bc6d8b619341518f74bd50e3b56510f86ad736137588a4e3253"
+    },
+    {
+      "model": "mlp",
+      "rows": 80,
+      "csv_json_match": true,
+      "metrics_sha256": "e6b0571cf50d8a36034511b1a04a48da87c86a7c84ebceeaac471786a90c3a05",
+      "summary_sha256": "e587cfee5bf07f859f59a1e97b996cd6bf64d5dfc2a6e8f93a2b725396052824"
+    }
+  ]
+}

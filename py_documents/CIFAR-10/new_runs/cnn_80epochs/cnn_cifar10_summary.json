@@ -1,0 +1,23 @@
+{
+  "model": "cnn",
+  "architecture": "Conv(3,6,5,pad=2)-ReLU-AvgPool(2)-Conv(6,16,5)-ReLU-AvgPool(2)-Flatten-120-ReLU-84-ReLU-10",
+  "preprocessing": "ToTensor (uint8 / 255)",
+  "optimizer": "SGD",
+  "learning_rate": 0.1,
+  "batch_size": 256,
+  "epochs": 80,
+  "seed": 42,
+  "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+  "elapsed_seconds": 30.26,
+  "final": {
+    "epoch": 80,
+    "train_loss": 0.3573348931312561,
+    "test_loss": 2.512801235961914,
+    "train_acc": 0.87494,
+    "test_acc": 0.5535,
+    "train_top5_err": 0.0020599999999999508,
+    "test_top5_err": 0.06569999999999998
+  },
+  "best_test_acc": 0.5796,
+  "best_test_epoch": 37
+}

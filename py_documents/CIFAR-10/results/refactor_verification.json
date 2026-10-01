@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "core_definitions_and_training_loop_identical": [
+    "BasicBlock",
+    "Bottleneck",
+    "PlainBottleneck",
+    "ResNet",
+    "make_mlp",
+    "make_cnn",
+    "load_cifar10",
+    "augment_batch",
+    "resnet.evaluate",
+    "resnet.write_metrics",
+    "resnet.train_one",
+    "baseline.evaluate",
+    "baseline.epoch_loop"
+  ],
+  "syntax_and_all_five_cli_help_checks": "passed",
+  "training_has_no_matplotlib_dependency": true,
+  "plotting_has_no_pytorch_dependency": true,
+  "smoke_checks": [
+    {
+      "model": "resnet18",
+      "one_epoch_training": "passed on synthetic input",
+      "training_emits_no_images": true,
+      "independent_plotting": "passed"
+    },
+    {
+      "model": "cnn",
+      "one_epoch_training": "passed on synthetic input",
+      "training_emits_no_images": true,
+      "independent_plotting": "passed"
+    },
+    {
+      "model": "mlp",
+      "one_epoch_training": "passed on synthetic input",
+      "training_emits_no_images": true,
+      "independent_plotting": "passed"
+    }
+  ],
+  "existing_results_and_figures_unchanged": true,
+  "scope": "One-epoch engineering checks use synthetic samples, not new CIFAR-10 accuracy evidence."
+}

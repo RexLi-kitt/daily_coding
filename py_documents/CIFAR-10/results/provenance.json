@@ -1,0 +1,76 @@
+{
+  "files": [
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_basicblock_80epochs\\resnet18_cifar10_metrics.csv",
+      "target": "results/resnet18_cifar10_metrics.csv",
+      "sha256": "D370EFDD1F7790CEF630FE973816CF3F955D5A86F12ED600B91ED9A0189F49BC",
+      "identical": true
+    },
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_basicblock_80epochs\\resnet18_cifar10_summary.json",
+      "target": "results/resnet18_cifar10_summary.json",
+      "sha256": "A201B31DFD2F654F13EE3ED93D5F6F70313A02235B15199211AE436060863C69",
+      "identical": true
+    },
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_cnn_mlp_comparison\\new_runs\\cnn_80epochs\\cnn_cifar10_metrics.csv",
+      "target": "results/cnn_cifar10_metrics.csv",
+      "sha256": "90178F42CBA19BA30FC1482F897D6E06A343E6D5C81FE0E21075905FD4EBD754",
+      "identical": true
+    },
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_cnn_mlp_comparison\\new_runs\\cnn_80epochs\\cnn_cifar10_summary.json",
+      "target": "results/cnn_cifar10_summary.json",
+      "sha256": "74ECDC3EE5061BC6D8B619341518F74BD50E3B56510F86AD736137588A4E3253",
+      "identical": true
+    },
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_cnn_mlp_comparison\\new_runs\\mlp_80epochs\\mlp_cifar10_metrics.csv",
+      "target": "results/mlp_cifar10_metrics.csv",
+      "sha256": "E6B0571CF50D8A36034511B1A04A48DA87C86A7C84EBCEEAAC471786A90C3A05",
+      "identical": true
+    },
+    {
+      "source": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_cnn_mlp_comparison\\new_runs\\mlp_80epochs\\mlp_cifar10_summary.json",
+      "target": "results/mlp_cifar10_summary.json",
+      "sha256": "E587CFEE5BF07F859F59A1E97B996CD6BF64D5DFC2A6E8F93A2B725396052824",
+      "identical": true
+    }
+  ],
+  "note": "Training records are unchanged. Refactored package code is derived from the pre-refactor archive, not an identical copy of the original workspace scripts.",
+  "code_refactor": {
+    "source_archive": "C:\\Users\\李\\Desktop\\CIFAR\\resnet18_cnn_mlp_comparison_before_refactor.zip",
+    "scope": "Package code split into model/data/training/plotting modules; core definitions and training loop verified unchanged.",
+    "verification": "results/refactor_verification.json",
+    "files": [
+      {
+        "path": "code\\compare_resnet_cifar10.py",
+        "sha256": "ad528e8ccd0f5daa4abd2391b1fac3ef0b78ad505cd93f4aa075f93077504685"
+      },
+      {
+        "path": "code\\data.py",
+        "sha256": "a85331ba5b8e9fc6ca6dda3be956b640ae2dde8bec21916bf2fdb963e7a5ef27"
+      },
+      {
+        "path": "code\\models.py",
+        "sha256": "0b092edba73c65895766e0ffcb06614782f8ed2cf9a772154a76f9f7718e4674"
+      },
+      {
+        "path": "code\\plot_training_curves.py",
+        "sha256": "7dc300268c65d1735a476031f9a1e44a57c5cb5571d6d302db41dae47209d085"
+      },
+      {
+        "path": "code\\train_mlp_cifar10.py",
+        "sha256": "6e2d7e052c84223f5f496ff4727ac5939a98c325e7faaa0e7f227a243284a57e"
+      },
+      {
+        "path": "code\\train_resnet_cifar10.py",
+        "sha256": "cf4f4c14dcc83737d6d537e659110600be38c097113a4614276cb1bb83ccdd22"
+      },
+      {
+        "path": "train_models.py",
+        "sha256": "8228e8f3bcdacc6f7521090384f0099231d07c292371df61792b5bec5e073a59"
+      }
+    ]
+  }
+}
