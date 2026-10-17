@@ -39,6 +39,11 @@ int main(){
             ans.push_back(number);
             needOperand = false;
         }
+        else if(ch == '+' && needOperand){
+            // 一元正号不改变操作数的值，跳过后仍需读取操作数
+            // 例如 +3、1+(+2)、2*+3、+(2+3)
+            continue;
+        }
         else if(ch == '-' && needOperand){
             // 前面需要操作数时，- 是一元负号，例如 -2 或 -(2+3)
             st.push('~');
