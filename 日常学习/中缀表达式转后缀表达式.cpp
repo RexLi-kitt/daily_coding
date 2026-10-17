@@ -1,176 +1,210 @@
-#include<iostream>
-#include<stack>
-#include<vector>
-#include<string>
-#include<cctype>
+#include <cctype>
+#include <iostream>
+#include <stack>
+#include <string>
+#include <vector>
 using namespace std;
-//比较符号的优先级
-int priority(char ch){
-    if(ch == '^') return 4;
-    if(ch == '~') return 3; // 用 ~ 表示一元负号
-    if(ch == '*' || ch == '/') return 2;
-    if(ch == '+' || ch == '-') return 1;
+// ~ 是程序内部使用的一元负号标记。
+int priority(char op) {
+    if (op == '^') return 4;
+    if (op == '~') return 3;
+    if (op == '*' || op == '/') return 2;
+    if (op == '+' || op == '-') return 1;
     return 0;
 }
 
-int main(){
-    string s;
-    stack<char> st;
-    vector<string> ans;
+bool isBinaryOperator(char op) {
+    return op == '+' || op == '-' || op == '*' || op == '/' || op == '^';
+}
+// 判断当前运算符入栈前，是否应先弹出栈顶运算符。
+bool shouldPopOperator(char top, char current) {
+    if (top == '(') return false;
+    bool higher = priority(top) > priority(current);
+    bool sameAndLeft = priority(top) == priority(current) && current != '^';
+    return higher || sameAndLeft;
+}
+// 转换时同时检查语法；失败时通过 error 返回提示。
+bool infixToPostfix(const string& expression,vector<string>& postfix,string& error) {
+    stack<char> operators;
     bool needOperand = true;
-    cout << "请输入整数中缀表达式：";
-    getline(cin, s);
-    for(int i = 0;i < (int)s.size();i ++){
-        char ch = s[i];
-        if(ch == ' ') continue;
-        if(isdigit(ch)){
-            if(!needOperand){
-                cout << "错误：两个操作数之间缺少运算符" << endl;
-                return 0;
+    postfix.clear();
+    error.clear();
+
+    for (int i = 0; i < expression.size(); ++i) {
+        char ch = expression[i];
+        if (ch == ' ') continue;
+
+        if (isdigit(static_cast<unsigned char>(ch))) {
+            if (!needOperand) {
+                error = "两个操作数之间缺少运算符";
+                return false;
             }
-            //一次性读入长数字
-            string number;
-            int j = i;
-            while(j < (int)s.size() && isdigit(s[j])){
-                number += s[j];
-                j ++;
+            // 将连续数字作为一个完整操作数读入。
+            size_t end = i;
+            while (end < expression.size() &&
+                   isdigit(static_cast<unsigned char>(expression[end]))) {
+                ++end;
             }
-            i = j - 1;
-            ans.push_back(number);
+            postfix.push_back(expression.substr(i, end - i));
+            i = end - 1;
             needOperand = false;
-        }
-        else if(ch == '+' && needOperand){
-            // 一元正号不改变操作数的值，跳过后仍需读取操作数
-            // 例如 +3、1+(+2)、2*+3、+(2+3)
+        } else if (ch == '+' && needOperand) {
+            // 一元正号不改变值，跳过后仍需要操作数。
             continue;
-        }
-        else if(ch == '-' && needOperand){
-            // 前面需要操作数时，- 是一元负号，例如 -2 或 -(2+3)
-            st.push('~');
-        }
-        else if(ch == '('){
-            if(!needOperand){
-                cout << "错误：左括号前缺少运算符" << endl;
-                return 0;
+        } else if (ch == '-' && needOperand) {
+            operators.push('~');
+        } else if (ch == '(') {
+            if (!needOperand) {
+                error = "左括号前缺少运算符";
+                return false;
             }
-            st.push(ch);
+            operators.push(ch);
             needOperand = true;
-        }
-        else if(ch == ')'){
-            if(needOperand){
-                cout << "错误：右括号前缺少操作数" << endl;
-                return 0;
+        } else if (ch == ')') {
+            if (needOperand) {
+                error = "右括号前缺少操作数";
+                return false;
             }
-            //弹出对应的(里面的符号
-            while(!st.empty() && st.top() != '('){
-                ans.push_back(string(1, st.top()));
-                st.pop();
+            while (!operators.empty() && operators.top() != '(') {
+                postfix.push_back(string(1, operators.top()));
+                operators.pop();
             }
-            if(st.empty()){
-                cout << "错误：括号不匹配" << endl;
-                return 0;
+            if (operators.empty()) {
+                error = "括号不匹配";
+                return false;
             }
-            //弹出(
-            st.pop();
+            operators.pop();
             needOperand = false;
-        }
-        else if(ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^'){
-            if(needOperand){
-                cout << "错误：运算符位置错误" << endl;
-                return 0;
+        } else if (isBinaryOperator(ch)) {
+            if (needOperand) {
+                error = "运算符位置错误";
+                return false;
             }
-            //弹出st内的符号
-        while(!st.empty() && st.top() != '('){
-            //栈顶的符号优先级更高，就把它先弹出
-            bool higher = priority(st.top()) > priority(ch);
-            //栈顶的符号优先级相同，并且不是乘方^，也先弹出
-            bool sameAndLeft = priority(st.top()) == priority(ch) && ch != '^';
-            if(!higher && !sameAndLeft) break;
-            ans.push_back(string(1, st.top()));
-            st.pop();
-        }
-            st.push(ch);
+            while (!operators.empty() && shouldPopOperator(operators.top(), ch)) {
+                postfix.push_back(string(1, operators.top()));
+                operators.pop();
+            }
+            operators.push(ch);
             needOperand = true;
+        } else {
+            error = "有非法字符";
+            return false;
         }
-        else{
-            cout << "错误：有非法字符" << endl;
-            return 0;
+    }
+
+    if (postfix.empty()) {
+        error = "表达式不能为空";
+        return false;
+    }
+    if (needOperand) {
+        error = "表达式末尾缺少操作数";
+        return false;
+    }
+    while (!operators.empty()) {
+        if (operators.top() == '(') {
+            error = "括号不匹配";
+            return false;
         }
+        postfix.push_back(string(1, operators.top()));
+        operators.pop();
     }
-    //检查结尾
-    if(ans.empty()){
-        cout << "错误：表达式不能为空" << endl;
-        return 0;
+    return true;
+}
+
+// 执行一次二元运算，a 是左操作数，b 是右操作数。
+bool calculateBinary(long long a, char op, long long b,long long& value, string& error) {
+    switch (op) {
+        case '+': value = a + b; break;
+        case '-': value = a - b; break;
+        case '*': value = a * b; break;
+        case '/':
+            if (b == 0) {
+                error = "除数不能为0";
+                return false;
+            }
+            value = a / b;
+            break;
+        case '^':
+            if (b < 0) {
+                error = "指数不能为负数";
+                return false;
+            }
+            value = 1;
+            for (long long i = 0; i < b; ++i) value *= a;
+            break;
+        default:
+            error = "有非法运算符";
+            return false;
     }
-    if(needOperand){
-        cout << "错误：表达式末尾缺少操作数" << endl;
-        return 0;
-    }
-    while(!st.empty()){
-        if(st.top() == '('){
-            cout << "错误：括号不匹配" << endl;
-            return 0;
-        }
-        ans.push_back(string(1, st.top()));
-        st.pop();
-    }
-    //根据后缀计算出结果
+    return true;
+}
+
+// 根据内部后缀表达式求值；~ 只弹出一个操作数。
+bool evaluatePostfix(const vector<string>& postfix,long long& result, string& error) {
     stack<long long> numbers;
-    for(int i = 0;i < (int)ans.size();i ++){
-        if(isdigit(ans[i][0])){
-            numbers.push(stoll(ans[i]));
-        }
-        else if(ans[i] == "~"){
-            if(numbers.empty()){
-                cout << "错误：操作数数量不正确" << endl;
-                return 0;
+    error.clear();
+    for (const string& token : postfix) {
+        if (!token.empty() && isdigit(static_cast<unsigned char>(token[0]))) {
+            numbers.push(stoll(token));
+        } else if (token == "~") {
+            if (numbers.empty()) {
+                error = "操作数数量不正确";
+                return false;
             }
             long long value = numbers.top();
             numbers.pop();
             numbers.push(-value);
-        }
-        else{
-            //只有一个数字
-            if(numbers.size() < 2){
-                cout << "错误：操作数数量不正确" << endl;
-                return 0;
+        } else {
+            if (numbers.size() < 2) {
+                error = "操作数数量不正确";
+                return false;
             }
             long long b = numbers.top();
             numbers.pop();
             long long a = numbers.top();
             numbers.pop();
             long long value = 0;
-            //具体计算
-            if(ans[i] == "+") value = a + b;
-            else if(ans[i] == "-") value = a - b;
-            else if(ans[i] == "*") value = a * b;
-            else if(ans[i] == "/"){// /他很特殊
-                if(b == 0){
-                    cout << "错误：除数不能为0" << endl;
-                    return 0;
-                }
-                value = a / b;
+            if (token.size() != 1) {
+                error = "有非法运算符";
+                return false;
             }
-            else if(ans[i] == "^"){
-                value = 1;
-                if(b < 0){
-                    cout << "错误：指数不能为负数" << endl;
-                    return 0;
-                }
-                for(int j = 0;j < b;j ++) value *= a;
-            }
+            if (!calculateBinary(a, token[0], b, value, error)) return false;
             numbers.push(value);
         }
     }
-    if(numbers.size() != 1){
-        cout << "错误：表达式缺少运算符" << endl;
+
+    if (numbers.size() != 1) {
+        error = "表达式缺少运算符";
+        return false;
+    }
+    result = numbers.top();
+    return true;
+}
+
+void printPostfix(const vector<string>& postfix) {
+    cout << "后缀表达式：";
+    for (const string& token : postfix) {
+        // 只调整显示，内部仍用 ~ 区分一元负号和减法。
+        cout << (token == "~" ? "-" : token) << ' ';
+    }
+    cout << '\n';
+}
+
+int main() {
+    string expression;
+    cout << "请输入整数中缀表达式：";
+    getline(cin, expression);
+
+    vector<string> postfix;
+    long long result = 0;
+    string error;
+    if (!infixToPostfix(expression, postfix, error) ||
+        !evaluatePostfix(postfix, result, error)) {
+        cout << "错误：" << error << '\n';
         return 0;
     }
-    cout << "后缀表达式：";
-    for(int i = 0;i < (int)ans.size();i ++){
-        // 内部用 ~ 区分一元负号，输出时显示为 -
-        cout << (ans[i] == "~" ? "-" : ans[i]) << ' ';
-    }
-    cout << endl;
-    cout << "表达式的值：" << numbers.top() << endl;
+
+    printPostfix(postfix);
+    cout << "表达式的值：" << result << '\n';
+    return 0;
 }
