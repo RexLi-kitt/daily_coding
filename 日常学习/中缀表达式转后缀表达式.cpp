@@ -167,7 +167,10 @@ int main(){
         return 0;
     }
     cout << "后缀表达式：";
-    for(int i = 0;i < (int)ans.size();i ++) cout << ans[i] << ' ';
+    for(int i = 0;i < (int)ans.size();i ++){
+        // 内部用 ~ 区分一元负号，输出时显示为 -
+        cout << (ans[i] == "~" ? "-" : ans[i]) << ' ';
+    }
     cout << endl;
     cout << "表达式的值：" << numbers.top() << endl;
 }
