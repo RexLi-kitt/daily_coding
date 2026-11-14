@@ -7,9 +7,13 @@
 & "C:\Users\李\Desktop\D2L\.venv\Scripts\python.exe" .\kaggle_digit_recognizer.py
 ```
 
-默认训练 20 轮，自动使用可用的 GPU；从 train.csv 随机划分 80% 训练、20% 验证。
-优化器使用普通 SGD，不加动量和权重衰减，默认学习率为 0.1，可通过 --lr 修改。
-每轮记录训练和验证指标，保存验证准确率最高的模型，用该模型预测 test.csv。
+默认最多训练 50 轮，自动使用可用的 GPU；从 train.csv 随机划分 80% 训练、20% 验证。
+优化器使用普通 SGD，不加动量和权重衰减，默认学习率为 0.01，可通过 --lr 修改。
+两层隐藏全连接层的 ReLU 后各接一个 Dropout，默认概率为 0.3，可通过 --dropout 修改。
+Dropout 只在训练时启用，评估和预测时自动关闭。
+早停监控验证损失：连续 5 轮没有超过 0.0001 的损失下降就停止。
+可通过 --patience 和 --min-delta 修改这两个阈值；--epochs 是最大训练轮数。
+每轮记录训练和验证指标，保存验证损失最低的模型，用该模型预测 test.csv。
 比赛测试数据没有标签，因此不计算测试准确率；上传后由 Kaggle 评分。
 
 输出位于 projects_handwriting/kaggle_output：

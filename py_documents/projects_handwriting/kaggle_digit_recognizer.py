@@ -21,8 +21,8 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 PROJECT_DIR = Path(__file__).resolve().parent
 
 
-def make_model():
-    # Same architecture as mnist_cnn.py; weights are trained from scratch.
+def make_model(dropout=0.3):
+    # Dropout is active only in model.train(); model.eval() disables it.
     return nn.Sequential(
         nn.Conv2d(1, 6, kernel_size=5, padding=2), nn.ReLU(),
         nn.AvgPool2d(kernel_size=2, stride=2),
@@ -30,7 +30,9 @@ def make_model():
         nn.AvgPool2d(kernel_size=2, stride=2),
         nn.Flatten(),
         nn.Linear(16 * 5 * 5, 120), nn.ReLU(),
+        nn.Dropout(p=dropout),
         nn.Linear(120, 84), nn.ReLU(),
+        nn.Dropout(p=dropout),
         nn.Linear(84, 10),
     )
 
@@ -106,13 +108,17 @@ def train(args, device):
         generator=torch.Generator().manual_seed(args.seed))
     train_eval = DataLoader(train_data, batch_size=1024, pin_memory=pin)
     val_eval = DataLoader(val_data, batch_size=1024, pin_memory=pin)
-    model = make_model().to(device)
+    model = make_model(args.dropout).to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     print(f"Training: {len(train_data)}; validation: {len(val_data)}", flush=True)
 
     fields = ["epoch", "batch_loss", "train_loss", "val_loss", "train_acc", "val_acc", "seconds"]
     rows = []
-    best_acc = -1.0
+    best_loss = float("inf")
+    best_acc = 0.0
+    best_epoch = 0
+    early_stop_loss = float("inf")
+    stale_epochs = 0
     with (args.output_dir / "history.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
@@ -130,27 +136,56 @@ def train(args, device):
                 batch_loss += loss.item() * len(batch_labels)
             train_loss, train_acc = evaluate(model, train_eval, device)
             val_loss, val_acc = evaluate(model, val_eval, device)
+            if not np.isfinite(train_loss) or not np.isfinite(val_loss):
+                raise ValueError("Non-finite loss; check the data and learning rate")
             row = dict(zip(fields, (
                 epoch, batch_loss / len(train_data), train_loss, val_loss,
                 train_acc, val_acc, time.perf_counter() - start)))
             rows.append(row)
             writer.writerow(row)
             file.flush()
-            if val_acc > best_acc:
+            # Save the actual lowest loss, even when its improvement is tiny.
+            if val_loss < best_loss:
+                best_loss = val_loss
                 best_acc = val_acc
-                torch.save(model.state_dict(), args.output_dir / "kaggle_cnn.pt")
+                best_epoch = epoch
+                torch.save({
+                    "model_state_dict": model.state_dict(),
+                    "dropout": args.dropout,
+                    "epoch": epoch,
+                    "val_loss": val_loss,
+                    "val_acc": val_acc,
+                }, args.output_dir / "kaggle_cnn.pt")
+            # Patience resets only after a sufficiently large improvement.
+            if val_loss < early_stop_loss - args.min_delta:
+                early_stop_loss = val_loss
+                stale_epochs = 0
+            else:
+                stale_epochs += 1
             print(f"Epoch {epoch:02d}/{args.epochs}: train loss={train_loss:.4f}, "
                   f"val loss={val_loss:.4f}, train acc={train_acc:.2%}, "
                   f"val acc={val_acc:.2%}", flush=True)
+            if stale_epochs >= args.patience:
+                print(f"Early stopping at epoch {epoch}: no significant validation-loss "
+                      f"improvement for {args.patience} epochs.", flush=True)
+                break
     plot_history(rows, args.output_dir)
-    print(f"Best validation accuracy: {best_acc:.2%}", flush=True)
+    print(f"Best model: epoch {best_epoch}, val loss={best_loss:.4f}, "
+          f"val acc={best_acc:.2%}", flush=True)
 
 
 @torch.inference_mode()
 def export_submission(args, device, test_images):
-    model = make_model().to(device)
-    model.load_state_dict(torch.load(
-        args.output_dir / "kaggle_cnn.pt", map_location=device, weights_only=True))
+    checkpoint = torch.load(
+        args.output_dir / "kaggle_cnn.pt", map_location=device, weights_only=True)
+    if "model_state_dict" in checkpoint:
+        model = make_model(checkpoint["dropout"]).to(device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+    else:
+        # Support weights saved by the earlier version without Dropout.
+        model = nn.Sequential(*[layer for layer in make_model()
+                                if not isinstance(layer, nn.Dropout)]).to(device)
+        model.load_state_dict(checkpoint)
     model.eval()
     # shuffle=False preserves the row order of Kaggle test.csv.
     loader = DataLoader(TensorDataset(test_images), batch_size=args.batch_size, shuffle=False)
@@ -172,9 +207,15 @@ def main():
     parser.add_argument("--train-csv", type=Path, default=PROJECT_DIR / "kaggle_data" / "train.csv")
     parser.add_argument("--test-csv", type=Path, default=PROJECT_DIR / "kaggle_data" / "test.csv")
     parser.add_argument("--output-dir", type=Path, default=PROJECT_DIR / "kaggle_output")
-    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=120)
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--lr", type=float, default=0.01)
+    parser.add_argument("--dropout", type=float, default=0.3,
+                        help="Drop probability after each hidden fully connected layer")
+    parser.add_argument("--patience", type=int, default=5,
+                        help="Stop after this many epochs without significant val-loss improvement")
+    parser.add_argument("--min-delta", type=float, default=0.0001,
+                        help="Minimum val-loss decrease to reset early-stopping patience")
     parser.add_argument("--val-ratio", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", choices=("auto", "cuda", "cpu"), default="auto")
@@ -184,6 +225,10 @@ def main():
         parser.error("epochs, batch-size and lr must be positive and finite")
     if not 0 < args.val_ratio < 1:
         parser.error("val-ratio must be between 0 and 1")
+    if not 0 <= args.dropout < 1:
+        parser.error("dropout must be in [0, 1)")
+    if args.patience < 1 or not np.isfinite(args.min_delta) or args.min_delta < 0:
+        parser.error("patience must be positive; min-delta must be finite and nonnegative")
     required = [args.test_csv]
     required.append(args.output_dir / "kaggle_cnn.pt" if args.predict_only else args.train_csv)
     for path in required:
